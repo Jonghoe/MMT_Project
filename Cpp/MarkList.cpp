@@ -3,20 +3,20 @@
 #include <process.h>
 #include <Windows.h>
 MarkList::MarkList():mvSize(0){}
-void MarkList::mAddMark( cv::Mat& _Mark){
-	cv::cvtColor(_Mark, _Mark, cv::COLOR_BGR2GRAY);
-	mvList.push_back(_Mark);
+void MarkList::mAddMark( cv::Mat& Mark){
+	cv::cvtColor(Mark, Mark, cv::COLOR_BGR2GRAY);
+	mvList.push_back(Mark);
 	mvSize++;
 }
-void MarkList::mDeleteMark(const cv::Mat&_Mark){
+void MarkList::mDeleteMark(const cv::Mat&Mark){
 	size_t i = 0;
 	auto iter = mvList.begin();
-	i = mFindMark(_Mark);
+	i = mFindMark(Mark);
 	mvList.erase((iter + i));
 }
 int MarkList::mFindMark(const cv::Mat& src){
 	HANDLE* Thread = new HANDLE[mvSize];
-	TR_Matching_Inform* Inform = new TR_Matching_Inform[mvSize];
+	TRMatchingInform* Inform = new TRMatchingInform[mvSize];
 	cv::Mat Tmp;
 	double MaxVal;
 	int Index = 0;
@@ -30,7 +30,7 @@ int MarkList::mFindMark(const cv::Mat& src){
 	}
 	//쓰레드 실행
 	for (size_t i = 0; i < mvSize; i++)
-		Thread[i] = (HANDLE)_beginthreadex(NULL, NULL, Find_Mark, &Inform[i], NULL, NULL);
+		Thread[i] = (HANDLE)_beginthreadex(NULL, NULL, FindMark, &Inform[i], NULL, NULL);
 	//쓰레드 대기
 	WaitForMultipleObjects(mvSize, Thread, TRUE, INFINITE);
 	//가장 최대 값을 찾아서 저장

@@ -1,5 +1,5 @@
 #include"FrameFactory.h"
-#include"Frame_FillBlank.h"
+#include"FrameFillBlank.h"
 FrameFactory* FrameFactory::Alive = NULL;
 Observer* FrameFactory::mvCreate(Label* _label){
 	Frame* newFrame;
