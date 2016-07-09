@@ -119,11 +119,9 @@ void Detecting_Model::mDetecting(){
 	}
 	
 	if (mvKey == PLAY){
-		
 		mvVc >> mvIMG;
 		((Debug_Viewer*)mvConnected[0])->mSet_R_IMG(&mvIMG);
 		((Debug_Viewer*)mvConnected[0])->mSet_Changed_IMG(&mvPrev_IMG);
-
 		IMG_Setting(mvIMG);
 		mvModify_Label(SUFFICIENT);
 		mvFind_Label();
@@ -138,6 +136,7 @@ void Detecting_Model:: mvSend_Label(){
 	for (; iter != mvLabelList.end(); iter++){
 		Info = Label_to_String(*(*iter));
 		cout << Info << endl;
+		mvSubject->mPush(*iter);
 		//mvSender.mSend(Info);
 	}
 //	auto iter = mvLabelList.begin();
@@ -158,4 +157,48 @@ void Detecting_Model::mvAdd_Label(Label* OB){
 void Detecting_Model::mvRemove_Label(Label* OB){
 	delete OB;
 	mvLabelList.remove(OB);
+}
+
+bool Detecting_Model::Make_Label(Detecting_Model* Model, Label** ML, cv::Point F_L, Type scale){
+	//	Tabel : MainFrame
+	//	ML : for MakingLabel
+	//	F_L : First location
+	//	scale : Range of Pixel
+	//	Find_Label에서 의심 받은 점(픽셀)부터 4방향으로 픽셀의 값이 255인 픽셀들의 수를 저장해 간다.
+	//	만약 주변의 픽셀(255인)의 수가 기준 보다 작을 시 불필요한 라벨로 판정 
+	//	기준에 만족시 라벨로 지정
+#define IN_RANGE(S,E,V) ((S)<(V)&&(V)<(E))
+	size_t Pixel_Num = 0;
+	int Ranges[4] = { F_L.x, F_L.y, F_L.y, F_L.x };
+	deque<cv::Point> P_Deque;
+	vector<cv::Point> Delete_List;		//	픽셀의 수가 범위 불충족시 그 부분을 지우기위한 컨테이너 
+	P_Deque.push_front(F_L);
+	Delete_List.reserve(U_LIMIT);
+	Delete_List.push_back(F_L);
+	while (!P_Deque.empty()){
+		int i;
+		cv::Point Loc = P_Deque.back();
+		cv::Point Ar[4] = { cv::Point(Loc.x - 1, Loc.y), cv::Point(Loc.x, Loc.y - 1),
+			cv::Point(Loc.x, Loc.y + 1), cv::Point(Loc.x + 1, Loc.y) };
+		P_Deque.pop_back();
+		for (i = 0; i < 4; i++){
+			if ((IN_RANGE(0, Model->mvIMG.rows, Ar[i].y) &&
+				IN_RANGE(0, Model->mvIMG.cols, Ar[i].x)) &&
+				Model->mvIMG.ptr<uchar>(Ar[i].y)[Ar[i].x] != 0 &&
+				Model->mvPrev_IMG.ptr<uchar>(Ar[i].y)[Ar[i].x] == 0){
+				SetRange(Ar[i], Ranges);
+				P_Deque.push_front(Ar[i]);
+				Delete_List.push_back(cvPoint(Ar[i].x, Ar[i].y));
+				Model->mvPrev_IMG.ptr<uchar>(Ar[i].y)[Ar[i].x] = Model->mvLabel_Num;
+				++Pixel_Num;
+			}
+		}
+
+	}
+	// Delete_Check
+	if (Delete_Check(Model->mvPrev_IMG, Delete_List, Pixel_Num, scale))
+		return false;
+	// 라벨 내용 설정
+	(*ML) = new Label(Ranges, Pixel_Num, Model->mvLabel_Num, Model->mvMarkList, Model->mvIMG, Model->mvPrev_IMG);
+	return true;
 }

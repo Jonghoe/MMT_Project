@@ -3,6 +3,7 @@
 #include<iostream>
 #include"MVC_Patter.h"
 #include"Debug_Controller.h"
+// 단순히 디버깅을 하기 위해 만든 클래스
 // 디버깅 전용 컨트롤러  뷰어 < -- > 컨트롤러 < -- > 모델 < -- > 뷰어
 // 싱글레톤 사용
 class Debug_Viewer{

@@ -3,9 +3,7 @@
 #include"Subject.h"
 class FrameSubject :public Subject
 {
-	FrameSubject::FrameSubject() :mvObArSz(0), mvHdArSz(0){
-		Factory = FrameFactory::mMakeFactory();
-	}
+private:
 	static int MarkID, LabelID;
 	static FrameSubject * Alive;
 	static FrameFactory * Factory;
@@ -15,6 +13,9 @@ class FrameSubject :public Subject
 	Label* mvHand[20];
 	Observer* mvOb[20][20];
 	vector<Label*>	mvVec;
+	FrameSubject::FrameSubject() :mvObArSz(0), mvHdArSz(0){
+		Factory = FrameFactory::mMakeFactory();
+	}
 	void mRegistOb(Observer*);
 	void mUnRegistOb(Observer*);
 	bool mFindOb(Label* Lb);
@@ -25,7 +26,6 @@ public:
 	static FrameSubject* mMakeSubject(){
 		if (Alive == NULL)
 			Alive = new FrameSubject();
-		
 		return Alive;
 	}
 

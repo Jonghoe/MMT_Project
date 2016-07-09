@@ -1,5 +1,5 @@
 #include"FrameSubject.h"
-
+#include"Frame.h"
 int FrameSubject::MarkID=0;
 int FrameSubject::LabelID=0;
 FrameFactory* FrameSubject::Factory=NULL;
@@ -36,7 +36,15 @@ void FrameSubject::mUnRegistOb(Observer* Ob){
 }
 
 void FrameSubject::mNotify(){
-	for (int i = 0; i < mvObArSz; ++i)
-		for (int j = 0; j < mvHdArSz; ++j)
-			mvObArray[i]->mvUpdate(mvHand[j]);
+	int max = 0, id, tmp;
+
+	for (int j = 0; j < mvHdArSz; ++j){
+		for (int i = 0; i < mvObArSz; ++i)
+			if (((Frame*)mvObArray[i])->mIn(mvHand[j]->mGetCenter()))				 
+				if (max<(tmp=((Frame*)mvObArray[i])->mGetPriority())){
+					max = tmp;
+					id = i;
+				}
+		mvObArray[id]->mvUpdate(mvHand[j]);
+	}
 }

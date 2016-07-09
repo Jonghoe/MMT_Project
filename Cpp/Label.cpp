@@ -1,9 +1,10 @@
 #include"Label.h"
 #include"MyFunction.h"
-ID Label::mGetID(){ return this->mvID; }
-ID Label::mGetMarkID(){ return this->mvMarkId; }
+ID Label::mGetID()const{ return this->mvID; }
+ID Label::mGetMarkID()const{ return this->mvMarkId; }
 Label::Label(){ mvCenter = cv::Point(0, 0); mvPixel_N = 0; mvTilt = 0; }
-Label::Label(int* Ranges, int Pixel_Num, int id, MarkList* _MarkList,cv::Mat& Img, cv::Mat& prev_img){
+Label::Label(int* Ranges, int Pixel_Num, int id,
+	MarkList* _MarkList,cv::Mat& Img, cv::Mat& prev_img){
 	mvCenter = cv::Point((Ranges[0] + Ranges[3]) / 2, (Ranges[1] + Ranges[2]) / 2);
 	mvRB = cv::Point(Ranges[3] + 1, Ranges[2] + 1);
 	mvLT = cv::Point(Ranges[0], Ranges[1]);
@@ -62,7 +63,7 @@ void Label::mSet_Angle(cv::Mat& IMG){
 	mvTilt = mvCalculate_Angle(IMG);
 }
 
-cv::Point Label::mGetCenter(){	return this->mvCenter;}
+cv::Point Label::mGetCenter()const{	return this->mvCenter;}
 bool Label::mModify(cv::Mat& mImg){
 	//	라벨의 이미지 범위 안의 픽셀 값이 255인 픽셀의 수를 세어
 	//	기준보다 픽셀의 수가 적으면 라벨을 삭제
@@ -83,7 +84,7 @@ bool Label::mModify(cv::Mat& mImg){
 	return false;
 }
 
-bool Label::mContainPoint(const cv::Point Loc){	
+bool Label::mContainPoint(const cv::Point Loc)const{	
 	//	점 Loc가 라벨의 안인지 아닌지 확인
 	bool Is_In = this->mvLT.x <= Loc.x && this->mvRB.x <= Loc.x ?
 		(this->mvLT.y <= Loc.y&& this->mvRB.y <= Loc.y ? true : false ): false;

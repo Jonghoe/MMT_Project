@@ -2,7 +2,7 @@
 #include"Label.h"
 #include"MVC_Patter.h"
 #include"FrameSubject.h"
-// µð¹ö±ë Àü¿ë ÄÁÆ®·Ñ·¯  ºä¾î < -- > ÄÁÆ®·Ñ·¯ < -- > ¸ðµ¨ < -- > ºä¾î
+// µð¹ö±ë Àü¿ë ÄÁÆ®·Ñ·¯  ºä¾î < -- > ÄÁÆ®·Ñ·¯ < -- > ¸ðµ¨
 // ½Ì±Û·¹Åæ »ç¿ë
 #define MaxLabel  20
 #define StartLabel 200
@@ -21,6 +21,7 @@ class Detecting_Model {
 	
 private:
 	int mvKey;
+
 	static Detecting_Model* Alive;
 	enum Target{DELETE_ALL,SUFFICIENT};
 	enum Command{  EXIT = 27, WAIT= 's',PLAY};
@@ -39,22 +40,20 @@ private:
 	void mvRemove_Label(Label* OB);
 	void mvSet_Next_Label_ID();
 	void mvModify_Label(Target t);
+	static bool Make_Label(Detecting_Model* Model, Label** ML, cv::Point F_L, Type scale);
 	FrameSubject * mvSubject;
 	Detecting_Model();
 	~Detecting_Model();
 public:
+	void mConnect(MVC Type, void* Vp){
+		if (Type == MVC::V)			mvConnected[0] = Vp;
+		else if (Type == MVC::C)	mvConnected[1] = Vp;
+	}
 	static Detecting_Model* mMake_Model(){
 		if (Alive != NULL)return Alive;
 		Alive = new Detecting_Model();
 		return Alive;
 	}
-	void mConnect(MVC Type, void* Vp){ 
-		if (Type == MVC::V)
-			mvConnected[0] = Vp;
-		else if (Type == MVC::C)
-			mvConnected[1] = Vp;
-	}
 	bool mExit();
 	void mDetecting();
-	friend	bool Make_Label(Detecting_Model* Model , Label** ML, cv::Point F_L, Type scale);
 };
