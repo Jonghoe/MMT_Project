@@ -14,8 +14,7 @@ int main(){
 
 	DC->mConnect(MVC::M, DM);
 	DC->mConnect(MVC::V, DV);
-	while (!DM->mExit()){
-		DM->mDetecting();
+	while (DM->mAction()){
 		DV->mShowViewer();
 	}
 }

@@ -9,5 +9,5 @@ public:
 	MarkList();
 	void mAddMark( cv::Mat&);
 	void mDeleteMark(const cv::Mat&);
-	int mFindMark(const cv::Mat& src);
+	int mFindMark(const cv::Mat& src)const;
 };

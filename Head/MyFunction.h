@@ -17,7 +17,7 @@ unsigned WINAPI FindMark(void* TMI);
 void CalculateAngleMain(const cv::Mat& src, Label&label);
 void FindLabel(const cv::Mat IMG, cv::Mat& PrevIMG, list<Label*>&VLabel,const size_t& LabelN,const Type scale);
 bool MakeLabel(DetectingModel* Model, Label** ML,const cv::Point FL,const Type scale);
-bool MakeLabel(const cv::Mat& IMG, cv::Mat& PrevIMG, Label** ML, const cv::Point FL, const uchar Val, const Type scale);
+//bool MakeLabel(const cv::Mat& IMG, cv::Mat& PrevIMG, Label** ML, const cv::Point FL, const uchar Val, const Type scale);
 bool DeleteCheck(cv::Mat&Label, vector<cv::Point>& con,const size_t PixelNum,const Type scale);
 
 string IToS(const int info,const int len);

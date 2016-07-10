@@ -4,6 +4,7 @@
 class FrameSubject :public Subject
 {
 private:
+	bool mvStop;
 	static int MarkID, LabelID;
 	static FrameSubject * Alive;
 	static FrameFactory * Factory;
@@ -21,7 +22,11 @@ private:
 	bool mFindOb(Label* Lb);
 	void mNotify();
 	void mvArrangement();
+	void mvHandThrow();
 public:
+	void mSetStop(bool s){
+		mvStop = s;
+	}
 	void mPush(Label*);
 	static FrameSubject* mMakeSubject(){
 		if (Alive == NULL)

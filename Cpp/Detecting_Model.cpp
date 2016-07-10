@@ -16,18 +16,15 @@ DetectingModel::DetectingModel(){
 	mvMarkList = new MarkList();
 	mvSubject = FrameSubject::mMakeSubject();
 	mvKey = PLAY;
+	/*
 	mvMarkList->mAddMark(cv::imread("Mark_0.jpg", cv::IMREAD_COLOR));
 	mvMarkList->mAddMark(cv::imread("Mark_1.jpg", cv::IMREAD_COLOR));
 	mvMarkList->mAddMark(cv::imread("Mark_2.jpg", cv::IMREAD_COLOR));
+	*/
 }
 
-bool DetectingModel::mExit(){
-	if (mvKey == EXIT){
+void DetectingModel::mvExit(){
 		mvEnd();
-		return true;
-	}
-	return false;
-
 }
 
 DetectingModel::~DetectingModel(){
@@ -51,22 +48,27 @@ void DetectingModel::mvSetNextLabelID(){
 			break;
 		}
 }
+void DetectingModel::mvCheckLabel(cv::Point& firstP){
+	Label* Labelshell = NULL;
+	mvSetNextLabelID();
+	if (Label::MakeLabel(mvIMG, mvPrevIMG, &Labelshell, firstP, mvLabelNum, LOW, MAKE)){
+		int val =	Labelshell->mSetMark(*mvMarkList);
+		if (val != 0)
+			Labelshell->mSetAngle(mvIMG);
+		mvLabelList.push_back(Labelshell);
+	}
+}
 
 void DetectingModel::mvFindLabel(){
 	//	픽셀의 값이 255이면서 어떤 라벨의 범위 안이 아닌 경우 라벨 의심 구역으로 지정하여 
 	//	MakeLabel함수 호출.
-	Label* Labelshell = NULL;
 	uchar* ptrM = NULL, *ptrV = NULL;
 	for (int y = 10; y < mvIMG.rows; y+=10){
 		ptrM = mvIMG.ptr<uchar>(y);
 		ptrV = mvPrevIMG.ptr<uchar>(y);
-		for (int x = 10; x < mvIMG.cols; x+=10)
-			if(ptrM[x] != 0 && ptrV[x] <StartLabel){ 
-				mvSetNextLabelID();
-				Labelshell = NULL;
-				if (MakeLabel(this, &Labelshell, cv::Point(x, y), LOW))
-					mvLabelList.push_back(Labelshell);
-			}
+		for (int x = 10; x < mvIMG.cols; x += 10)
+			if (ptrM[x] != 0 && ptrV[x] < StartLabel)
+				mvCheckLabel(cv::Point(x,y));
 	}
 
 	for (int y = 0; y < mvIMG.rows; y++){
@@ -107,25 +109,26 @@ void DetectingModel::mvModifyLabel(Target T){
 	
 	
 }
-
-void DetectingModel::mDetecting(){
+void DetectingModel::mvAddMark(){
+	string Buff;
+	
+	cin >> Buff;
+	if (Buff.compare("end") == 0)
+		mvKey = PLAY;
+	else
+		mvMarkList->mAddMark(cv::imread(Buff, cv::IMREAD_COLOR));
+}
+void DetectingModel::mvDetecting(){
 	//	DetectingModel 클래스의 메인 역할을 하는 함수 
 	//	반복되면서 Blob , Detect 등 이런저런 역할을 한다.
-	if (((DebugController*)mvConnected[1])->mKeyPushed()){
-		int TmpK = ((DebugController*)mvConnected[1])->mPutKey();
-		bool StopK = TmpK == 's';
-		mvKey = StopK ? (mvKey==PLAY ? WAIT:PLAY) : TmpK;
-	}
-	
-	if (mvKey == PLAY){
-		mvVc >> mvIMG;
-		((DebugViewer*)mvConnected[0])->mSetRIMG(&mvIMG);
-		((DebugViewer*)mvConnected[0])->mSetChangedIMG(&mvPrevIMG);
-		IMGSetting(mvIMG);
-		mvModifyLabel(SUFFICIENT);
-		mvFindLabel();
-		mvSendLabel();
-	}
+		
+	mvVc >> mvIMG;
+	((DebugViewer*)mvConnected[0])->mSetRIMG(&mvIMG);
+	((DebugViewer*)mvConnected[0])->mSetChangedIMG(&mvPrevIMG);
+	IMGSetting(mvIMG);
+	mvModifyLabel(SUFFICIENT);
+	mvFindLabel();
+	mvSendLabel();
 
 }
 
@@ -134,21 +137,41 @@ void DetectingModel:: mvSendLabel(){
 	////	추후 ObjectiveC 를 사용하여 소켓통신을 사용치않고 이용
 	string Info;
 	auto iter = mvLabelList.begin();
+	mvSubject->mSetStop(true);
 	for (; iter != mvLabelList.end(); iter++){
 		Info = LabeltoString(*(*iter));
 		cout << Info << endl;
 		mvSubject->mPush(*iter);
-		//mvSender.mSend(Info);
 	}
-//	auto iter = mvLabelList.begin();
-//	for (; iter != mvLabelList.end(); ++iter)
-//		mvSubject->mPush(*iter);
+	mvSubject->mSetStop(false);
+
+
 }
 
 void DetectingModel::mvEnd(){
 	//	동적할당 모두 해제
 	mvModifyLabel(DELETEALL);
 	delete mvMarkList;
+}
+void DetectingModel::mvSelectAct(){
+	if (((DebugController*)mvConnected[1])->mKeyPushed()){
+		int TmpK = ((DebugController*)mvConnected[1])->mPutKey();
+		bool StopK = TmpK == 's';
+		mvKey = StopK ? (mvKey == PLAY ? WAIT : PLAY) : TmpK;
+	}
+}
+
+bool DetectingModel::mAction(){
+	mvSelectAct();
+	if (mvKey == ADD)
+		mvAddMark();
+	else if (mvKey == PLAY)
+		mvDetecting();
+	else if (mvKey == EXIT){
+		mvExit();
+		return false;
+	}
+	return true;
 }
 
 void DetectingModel::mvAddLabel(Label* OB){
@@ -158,50 +181,4 @@ void DetectingModel::mvAddLabel(Label* OB){
 void DetectingModel::mvRemoveLabel(Label* OB){
 	delete OB;
 	mvLabelList.remove(OB);
-}
-
-bool DetectingModel::MakeLabel(DetectingModel* Model, Label** ML, cv::Point FL, Type scale){
-	//	Tabel : MainFrame
-	//	ML : for MakingLabel
-	//	FL : First location
-	//	scale : Range of Pixel
-	//	FindLabel에서 의심 받은 점(픽셀)부터 4방향으로 픽셀의 값이 255인 픽셀들의 수를 저장해 간다.
-	//	만약 주변의 픽셀(255인)의 수가 기준 보다 작을 시 불필요한 라벨로 판정 
-	//	기준에 만족시 라벨로 지정
-	size_t PixelNum = 0;
-	int Ranges[4] = { FL.x, FL.y, FL.y, FL.x };
-	deque<cv::Point> PDeque;
-	vector<cv::Point> DeleteList;		//	픽셀의 수가 범위 불충족시 그 부분을 지우기위한 컨테이너 
-	PDeque.push_front(FL);
-	DeleteList.reserve(ULIMIT);
-	DeleteList.push_back(FL);
-	while (!PDeque.empty()){
-		int i;
-		cv::Point Loc = PDeque.back();
-		cv::Point Ar[4] = { cv::Point(Loc.x - 1, Loc.y), cv::Point(Loc.x, Loc.y - 1),
-			cv::Point(Loc.x, Loc.y + 1), cv::Point(Loc.x + 1, Loc.y) };
-		PDeque.pop_back();
-#define INRANGE(S,V,E) ((S)<(V)&&(V)<(E))
-		for (i = 0; i < 4; i++){
-			if ((INRANGE(0, Ar[i].y, Model->mvIMG.rows) &&
-				INRANGE(0, Ar[i].x, Model->mvIMG.cols)) &&
-				Model->mvIMG.ptr<uchar>(Ar[i].y)[Ar[i].x] != 0 &&
-				Model->mvPrevIMG.ptr<uchar>(Ar[i].y)[Ar[i].x] == 0){
-				SetRange(Ar[i], Ranges);
-				PDeque.push_front(Ar[i]);
-				DeleteList.push_back(cvPoint(Ar[i].x, Ar[i].y));
-				Model->mvPrevIMG.ptr<uchar>(Ar[i].y)[Ar[i].x] = Model->mvLabelNum;
-				++PixelNum;
-			}
-		}
-
-	}
-	// DeleteCheck
-	if (DeleteCheck(Model->mvPrevIMG, DeleteList, PixelNum, scale))
-		return false;
-	// 라벨 내용 설정
-	(*ML) = new Label(Ranges, PixelNum,
-		Model->mvLabelNum, Model->mvMarkList,
-		Model->mvIMG, Model->mvPrevIMG);
-	return true;
 }

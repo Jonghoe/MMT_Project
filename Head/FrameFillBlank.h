@@ -7,6 +7,6 @@ protected:
 	void mvAction();
 public:
 	void mvUpdate(void* info);
-	FillBlank(int ID=0) :Frame(ID){};
+	FillBlank(int MID=0,int LID =0) :Frame(MID,LID){};
 
 };
