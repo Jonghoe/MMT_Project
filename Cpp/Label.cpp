@@ -2,6 +2,7 @@
 #include"MyFunction.h"
 ID Label::mGetID()const{ return this->mvID; }
 ID Label::mGetMarkID()const{ return this->mvMarkID; }
+cv::Point Label::mGetCenter()const{ return this->mvCenter; }
 Label::Label(){ mvCenter = cv::Point(0, 0); mvPixelN = 0; mvTilt = 0; }
 Label::Label(int* ranges, int pixelNum, int id,cv::Mat& prevImg){
 	mvCenter = cv::Point((ranges[0] + ranges[3]) / 2, (ranges[1] + ranges[2]) / 2);
@@ -21,6 +22,9 @@ Label::Label(int* ranges, int pixelNum, int id){
 	mvID = id;
 }
 Label::~Label(){}
+void Label::mSetAngle(cv::Mat& IMG){
+	mvTilt = mvCalculateAngle(IMG);
+}
 double Label::mvCalculateAngle(cv::Mat& IMG){
 	list<Label*> temp;
 	cv::Point locAngle;
@@ -56,12 +60,17 @@ double Label::mvCalculateAngle(cv::Mat& IMG){
 		delete *iter;
 	return angle;
 }
-
-void Label::mSetAngle(cv::Mat& IMG){
-	mvTilt = mvCalculateAngle(IMG);
+void Label::mvRotateImg(){
+	cv::Mat dst;
+	cv::Point2f pt(mvPrevImg.cols / 2., mvPrevImg.rows / 2.);
+	cv::Mat r = getRotationMatrix2D(pt, -mvTilt, 1.0);
+	warpAffine(mvPrevImg, mvZone, r, cv::Size(mvPrevImg.cols, mvPrevImg.rows));
+}
+void Label::mSetMark(const MarkList& markList){
+	mvMarkID = markList.mFindMark(mvZone);
 }
 
-cv::Point Label::mGetCenter()const{	return this->mvCenter;}
+
 bool Label::mModify(cv::Mat& mimg){
 	//	라벨의 이미지 범위 안의 픽셀 값이 255인 픽셀의 수를 세어
 	//	기준보다 픽셀의 수가 적으면 라벨을 삭제
@@ -87,11 +96,6 @@ bool Label::mContainPoint(const cv::Point Loc)const{
 	bool inX = this->mvLT.x <= Loc.x && Loc.x <= this->mvRB.x;
 	bool inY = this->mvLT.y <= Loc.y && Loc.y <= this->mvRB.y;
 	return inX&&inY;
-}
-int Label::mSetMark(const MarkList& markList){
-	cv::Mat zone = mvPrevImg(cv::Range(mvLT.y, mvRB.y),
-		cv::Range(mvLT.x,mvRB.x));
-	return mvMarkID =  markList.mFindMark(zone);
 }
 void Label::mvMoving(cv::Mat& mIMG){
 	//	라벨의 범위 내에서 다시 블랍 하여 라벨을 이동( 재생성하여 위치 이동 )
@@ -124,19 +128,18 @@ bool Label::MakeLabel(const cv::Mat& img, cv::Mat& prevImg, Label** ML, const cv
 	deleteList.reserve(ULIMIT);
 	deleteList.push_back(FL);
 	while (!pDeq.empty()){
-		int i;
+		cv::Point* Pt;
 		cv::Point Loc = pDeq.back();
 		cv::Point Ar[4] = { cv::Point(Loc.x - 1, Loc.y), cv::Point(Loc.x, Loc.y - 1),
 			cv::Point(Loc.x, Loc.y + 1), cv::Point(Loc.x + 1, Loc.y) };
 		pDeq.pop_back();
-		for (i = 0; i < 4; i++){
-			if (INRANGE(0, Ar[i].y, img.rows) && INRANGE(0, Ar[i].x, img.cols) &&
-				img.ptr<uchar>(Ar[i].y)[Ar[i].x] != 0 &&
-				prevImg.ptr<uchar>(Ar[i].y)[Ar[i].x] == 0){
-				SetRange(Ar[i], ranges);
-				pDeq.push_front(Ar[i]);
-				deleteList.push_back(cvPoint(Ar[i].x, Ar[i].y));
-				prevImg.ptr<uchar>(Ar[i].y)[Ar[i].x] = val;
+		for (Pt = &Ar[0]; Pt < Ar+ 4; ++Pt){
+			if (INRANGE(0, Pt->y, img.rows) && INRANGE(0, Pt->x, img.cols) &&
+				img.ptr<uchar>(Pt->y)[Pt->x] != 0 &&prevImg.ptr<uchar>(Pt->y)[Pt->x] == 0){
+				SetRange(*Pt, ranges);
+				pDeq.push_front(*Pt);
+				deleteList.push_back(cvPoint(Pt->x, Pt->y));
+				prevImg.ptr<uchar>(Pt->y)[Pt->x] = val;
 				++pixelNum;
 			}
 		}
@@ -144,6 +147,7 @@ bool Label::MakeLabel(const cv::Mat& img, cv::Mat& prevImg, Label** ML, const cv
 	// DeleteCheck
 	if (DeleteCheck(prevImg, deleteList, pixelNum, scale))
 		return false;
+
 	// 라벨 내용 설정
 	if (T == MAKE)
 		(*ML) = new Label(ranges, pixelNum,val, prevImg);

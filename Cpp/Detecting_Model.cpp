@@ -52,9 +52,8 @@ void DetectingModel::mvCheckLabel(cv::Point& firstP){
 	Label* Labelshell = NULL;
 	mvSetNextLabelID();
 	if (Label::MakeLabel(mvIMG, mvPrevIMG, &Labelshell, firstP, mvLabelNum, LOW, MAKE)){
-		int val =	Labelshell->mSetMark(*mvMarkList);
-		if (val != 0)
-			Labelshell->mSetAngle(mvIMG);
+		Labelshell->mSetAngle(mvIMG);
+		Labelshell->mSetMark(*mvMarkList);
 		mvLabelList.push_back(Labelshell);
 	}
 }

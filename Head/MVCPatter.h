@@ -1,2 +1,2 @@
 #pragma once
-enum MVC{M,V,C};
+enum MVC{M,V,C};			//Model,View,Control    l

@@ -5,12 +5,14 @@ inline bool inRange(int b, int v, int e){
 }
 string IToS(const int info,const int len){
 	//	받은 숫자 정보를 스트링으로 바꾼후 len에 맞게 0을 넣음
-	string tmp,RetV;
-	tmp = to_string(info);
-	for (unsigned i = 0; i < len - tmp.length(); i++)
-		RetV.append("0");
-	RetV.append(tmp);
-	return RetV;
+	string INFO;
+	char buff[10];
+	itoa(info, buff, 10);
+	
+	for (unsigned i = 0; i < len - strlen(buff); i++)
+		INFO.append("0");
+	INFO.append(buff);
+	return INFO;
 }
 string LabeltoString( Label& obj){
 //	라벨의 위치(센터 점), 라벨ID , 마크ID 스틀링으로 변환

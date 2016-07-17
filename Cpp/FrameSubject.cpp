@@ -2,11 +2,10 @@
 #include"Frame.h"
 int FrameSubject::MarkID=0;
 int FrameSubject::LabelID=0;
-FrameFactory* FrameSubject::Factory=NULL;
 FrameSubject* FrameSubject::Alive=NULL;
 
 void FrameSubject::mRegistOb(Observer* Ob){
-	mvOb[MarkID][LabelID] = Ob;
+	mvOb[MarkID][LabelID] = dynamic_cast<Frame*>(Ob);
 }
 void FrameSubject::mPush(Label* lb){
 	mvVec.push_back(lb);

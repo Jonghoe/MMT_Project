@@ -1,4 +1,5 @@
 #pragma once
+/* 사용할지 아직 미정 */
 class HandEvent{
 protected:
 	virtual void mvAction() = 0;
