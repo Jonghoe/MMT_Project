@@ -37,14 +37,12 @@ public:
 	Label Label::operator=(const Label& copy);	//라벨 대입 연산자
 	bool mModify(cv::Mat& IMG);					// 라벨을 조정
 	void mClearIMG(){							// 라벨의 구역을 삭제
-		for (int y = mvLT.y; y<mvPrevImg.rows && y < mvRB.y; y++){
-			uchar* ptrIMG = mvPrevImg.ptr<uchar>(y);
-			for (int x = mvLT.x; x < mvPrevImg.cols && x < mvRB.x; x++)
-				ptrIMG[x] = 0;
-		}
+
+		cv::Range row(mvLT.y, mvRB.y);
+		cv::Range col(mvLT.x, mvRB.x);
+		mvPrevImg(row, col) -= mvPrevImg(row, col);
 	}
 	//라벨 생성
-	static bool MakeLabel(const cv::Mat& img, cv::Mat& prevImg, Label** ML, const cv::Point FL, const uchar val, const Type scale, Act T);
-
+	friend Label* MakeLabel(const cv::Mat& img, cv::Mat& prevImg, const cv::Point FL, const uchar val, const Type scale, Act T);
 
 };

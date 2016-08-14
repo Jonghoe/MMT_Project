@@ -12,7 +12,10 @@ Label::Label(int* ranges, int pixelNum, int id,cv::Mat& prevImg){
 	mvID = id;
 	mvPrevImg = prevImg;
 	mvTilt = 0;
-	cout << mvID << "is Created !!" << endl;
+	mvZone=prevImg(cv::Range(mvLT.y, mvRB.y), cv::Range(mvLT.x, mvRB.x));
+#ifdef DEBUG
+	cout << mvID <<"is Created"<< endl;
+#endif
 }
 Label::Label(int* ranges, int pixelNum, int id){
 	mvCenter = cv::Point((ranges[0] + ranges[3]) / 2, (ranges[1] + ranges[2]) / 2);
@@ -58,11 +61,12 @@ double Label::mvCalculateAngle(cv::Mat& IMG){
 			angle = -PI - asin(Loc.y / tempRadius);
 	for (auto iter = temp.begin(); iter != temp.end(); iter++)
 		delete *iter;
+
 	return angle;
 }
 void Label::mvRotateImg(){
 	cv::Mat dst;
-	cv::Point2f pt(mvPrevImg.cols / 2., mvPrevImg.rows / 2.);
+	cv::Point2f pt((float)(mvPrevImg.cols / 2), (float)(mvPrevImg.rows / 2));
 	cv::Mat r = getRotationMatrix2D(pt, -mvTilt, 1.0);
 	warpAffine(mvPrevImg, mvZone, r, cv::Size(mvPrevImg.cols, mvPrevImg.rows));
 }
@@ -107,7 +111,7 @@ void Label::mvMoving(cv::Mat& mIMG){
 		for (int x = mvLT.x; x < mvRB.x; x++)
 			if (ptrM[x] != 0 && ptrV[x] == 0){
 				Label* tmp = NULL;
-				if (MakeLabel(mIMG, mvPrevImg, &tmp, cv::Point(x, y), mvID, LOW,TRACKING))
+				if ((tmp = MakeLabel(mIMG, mvPrevImg, cv::Point(x, y), mvID, LOW,TRACKING)))
 					VLabel.push_back(tmp);
 			}
 	}
@@ -117,7 +121,7 @@ void Label::mvMoving(cv::Mat& mIMG){
 		mvRB = (*VLabel.begin())->mvRB;
 	}
 }
-bool Label::MakeLabel(const cv::Mat& img, cv::Mat& prevImg, Label** ML, const cv::Point FL, const uchar val, const Type scale,Act T){
+Label* MakeLabel(const cv::Mat& img, cv::Mat& prevImg, const cv::Point FL, const uchar val, const Type scale,Act T){
 #define INRANGE(b,v,e) ((b)<(v))&&((v)<(e))
 
 	int pixelNum = 0;
@@ -146,14 +150,14 @@ bool Label::MakeLabel(const cv::Mat& img, cv::Mat& prevImg, Label** ML, const cv
 	}
 	// DeleteCheck
 	if (DeleteCheck(prevImg, deleteList, pixelNum, scale))
-		return false;
+		return nullptr;
 
 	// 라벨 내용 설정
 	if (T == MAKE)
-		(*ML) = new Label(ranges, pixelNum,val, prevImg);
+		return new Label(ranges, pixelNum,val, prevImg);
 	else if (T==TRACKING)
-		(*ML) = new Label(ranges, pixelNum, val);
-	return true;
+		return new Label(ranges, pixelNum, val);
+	return NULL;
 }
 
 

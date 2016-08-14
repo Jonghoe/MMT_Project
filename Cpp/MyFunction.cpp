@@ -54,7 +54,7 @@ void FindLabel(const cv::Mat IMG, cv::Mat& PrevIMG, list<Label*>&VLabel,const si
 		for (int x = 10; x < IMG.cols; x+=10){
 			Label* tmp;
 			if (ptrM[x] != 0 &&ptrV[x]==0 )
-				if (Label::MakeLabel(IMG, PrevIMG, &tmp, cv::Point(x, y), LabelNum, scale,MAKE))
+				if (tmp = MakeLabel(IMG, PrevIMG,  cv::Point(x, y), LabelNum, scale,MAKE))
 					VLabel.push_back(tmp);
 		}
 	}

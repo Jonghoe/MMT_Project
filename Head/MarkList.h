@@ -10,4 +10,5 @@ public:
 	void mAddMark( cv::Mat&);				//마크 추가
 	void mDeleteMark(const cv::Mat&);		//마크 삭제
 	int mFindMark(const cv::Mat& src)const;	//마크 검색
+	size_t mGetSize(){ return mvSize; }
 };

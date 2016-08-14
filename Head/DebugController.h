@@ -1,4 +1,4 @@
-#pragma once
+	#pragma once
 #include"MVCPatter.h"
 #include<opencv.hpp>
 // 단순히 디버깅을 하기 위해 만든 클래스
@@ -18,8 +18,8 @@ private:
 	~DebugController(){  }
 public:
 	static DebugController* mMakeController(){//싱글레톤 생성 함수
-		if (Alive != NULL)	return Alive;
-		Alive = new DebugController();
+		if (Alive == nullptr)
+			Alive = new DebugController();
 		return Alive;
 	}
 	void mDeleteController(){				// 싱글레톤 파괴 함수

@@ -21,15 +21,16 @@ void MarkList::mDeleteMark(const cv::Mat&Mark){
 int MarkList::mFindMark(const cv::Mat& src)const{
 	HANDLE* Thread = new HANDLE[mvSize];
 	TRMatchingInform* Inform = new TRMatchingInform[mvSize];
-	cv::Mat Tmp;
+	cv::Mat Tmp(src);
 	double MaxVal;
 	int Index = 0;
+	
 	if (mvList.size() == 0)
 		return 0;
-	//비교할 영상의 크기를 변경
-	cv::resize(src, Tmp, mvList[0].size());
 	//쓰레드 핸들러에게 넘겨줄 정보저장
 	for (size_t i = 0; i < mvSize; i++){
+		//비교할 영상의 크기를 변경
+		cv::resize(src, Tmp, mvList[i].size());
 		Inform[i].CompareIMG = Tmp;
 		Inform[i].MarkIMG = mvList[i];
 		Inform[i].MaxVal = 0;
@@ -41,9 +42,7 @@ int MarkList::mFindMark(const cv::Mat& src)const{
 	WaitForMultipleObjects(mvSize, Thread, TRUE, INFINITE);
 	//가장 최대 값을 찾아서 저장
 	MaxVal = Inform[0].MaxVal;
-	cout << Inform[0].MaxVal<<endl;
 	for (size_t i = 1; i < mvSize; i++){
-		cout << Inform[i].MaxVal<<endl;
 		if (MaxVal < Inform[i].MaxVal && Inform[i].MaxVal >0.8){
 			MaxVal = Inform[i].MaxVal;
 			Index = i;
