@@ -14,18 +14,13 @@ DetectingModel::DetectingModel(){
 	IMGSetting(mvPrevIMG);
 	mvLabelNum = StartLabel;
 	mvMarkList = new MarkList();
-	mvSubject = FrameSubject::mMakeSubject();
+	mvClassify = new Classification();
 	mvKey = PLAY;
-	/*
 	mvMarkList->mAddMark(cv::imread("Mark_0.jpg", cv::IMREAD_COLOR));
 	mvMarkList->mAddMark(cv::imread("Mark_1.jpg", cv::IMREAD_COLOR));
 	mvMarkList->mAddMark(cv::imread("Mark_2.jpg", cv::IMREAD_COLOR));
-	*/
 }
 
-void DetectingModel::mvExit(){
-		mvEnd();
-}
 
 DetectingModel::~DetectingModel(){
 	cout << "DetectingModelDelete" << endl;
@@ -51,7 +46,7 @@ void DetectingModel::mvSetNextLabelID(){
 void DetectingModel::mvCheckLabel(cv::Point& firstP){
 	Label* Labelshell = NULL;
 	mvSetNextLabelID();
-	if (Label::MakeLabel(mvIMG, mvPrevIMG, &Labelshell, firstP, mvLabelNum, LOW, MAKE)){
+	if (Labelshell = MakeLabel(mvIMG, mvPrevIMG, firstP, mvLabelNum, LOW, MAKE)){
 		Labelshell->mSetAngle(mvIMG);
 		Labelshell->mSetMark(*mvMarkList);
 		mvLabelList.push_back(Labelshell);
@@ -122,12 +117,13 @@ void DetectingModel::mvDetecting(){
 	//	반복되면서 Blob , Detect 등 이런저런 역할을 한다.
 		
 	mvVc >> mvIMG;
+#ifdef DEBUG
 	((DebugViewer*)mvConnected[0])->mSetRIMG(&mvIMG);
 	((DebugViewer*)mvConnected[0])->mSetChangedIMG(&mvPrevIMG);
+#endif
 	IMGSetting(mvIMG);
 	mvModifyLabel(SUFFICIENT);
 	mvFindLabel();
-	mvSendLabel();
 
 }
 
@@ -135,14 +131,14 @@ void DetectingModel:: mvSendLabel(){
 	//// Sender 를 통해 Tcp/IP 기능으로 정보 전달
 	////	추후 ObjectiveC 를 사용하여 소켓통신을 사용치않고 이용
 	string Info;
-	auto iter = mvLabelList.begin();
-	mvSubject->mSetStop(true);
-	for (; iter != mvLabelList.end(); iter++){
+	list<Label*>::iterator iter;
+	for (iter = mvLabelList.begin(); iter != mvLabelList.end(); iter++){
+		mvClassify->mGetInfo(*iter);
+#ifdef DEBUG
 		Info = LabeltoString(*(*iter));
 		cout << Info << endl;
-		mvSubject->mPush(*iter);
+#endif
 	}
-	mvSubject->mSetStop(false);
 
 
 }
@@ -161,16 +157,30 @@ void DetectingModel::mvSelectAct(){
 }
 
 bool DetectingModel::mAction(){
+#ifdef DEBUG
 	mvSelectAct();
+	cout << mvMarkList->mGetSize() << endl;
 	if (mvKey == ADD)
 		mvAddMark();
-	else if (mvKey == PLAY)
+	else if (mvKey == PLAY){
 		mvDetecting();
+		mvSendLabel();
+
+	}
 	else if (mvKey == EXIT){
-		mvExit();
+		mvEnd();
 		return false;
 	}
 	return true;
+#else if
+	mvDetecting();
+	if (mvKey = cv::waitKey(10) == 27){
+		mvEnd();
+		return false;
+	}
+	return true;
+#endif
+
 }
 
 void DetectingModel::mvAddLabel(Label* OB){

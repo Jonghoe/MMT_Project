@@ -1,7 +1,10 @@
 #pragma once
 #include"Label.h"
 #include"MVCPatter.h"
-#include"FrameSubject.h"
+#include"Classification.h"
+//디버깅시 사용
+#define DEBUG
+
 // 디버깅 전용 컨트롤러  뷰어 < -- > 컨트롤러 < -- > 모델
 // 싱글레톤 사용
 #define MaxLabel  20
@@ -10,7 +13,7 @@ class DetectingModel {
 private:
 	enum Target{ DELETEALL, SUFFICIENT };
 	enum Command{ EXIT = 27, ADD = 'a', WAIT = 's', PLAY };
-	FrameSubject * mvSubject;			//라벨 정보로 Frame생성 및 관리하는 객체 포인터
+	Classification * mvClassify;		//라벨 정보로 Frame생성 및 관리하는 객체 포인터
 	int mvKey;							//DbugController한테 받은 키값을 저장
 	static DetectingModel* Alive;		//싱그렐톤 기법을 위한 변수
 	MarkList* mvMarkList;				//마크 리스트 포인터
@@ -22,14 +25,13 @@ private:
 	void* mvConnected[2];				//DbugController,Viewer 객체 포인터
 	void mvSelectAct();					//mvKey 값(/Command)으로 할 행동을 정하는 함수
 	void mvDetecting();					//영상에서 라벨 검색
-	void mvExit();						//종료
 	void mvEnd();						//메모리 해제가 필요한 내용들을 메모리 해제
 										//해제하는 함수
 	void mvFindLabel();					//라벨 찾기
 	void mvAddMark();					//마크 추가
 	void mvCheckLabel(cv::Point& firstP);//이 임시라벨이 타당한 라벨인지 확인
 	void mvMoveLabel();					//라벨의 움직임 체크
-	void mvSendLabel();					//라벨 정보를 FrameSubject로 전달
+	void mvSendLabel();					//라벨 정보를 FrameController로 전달
 	void mvAddLabel(Label* ob);			//라벨 추가
 	void mvRemoveLabel(Label* OB);		//라벨 삭제
 	void mvSetNextLabelID();			//라벨의 다음 ID값 설정
