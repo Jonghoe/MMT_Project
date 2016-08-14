@@ -1,6 +1,6 @@
 #include"FrameFillBlank.h"
 #include"Label.h"
-void FillBlank::mvAction(){
+void FillBlank::mAction(){
 	cout << 5 << endl;
 }
 void FillBlank::mvUpdate(void* info){

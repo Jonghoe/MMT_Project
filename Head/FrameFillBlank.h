@@ -5,9 +5,9 @@ using namespace std;
 class FillBlank :public Frame
 {
 protected:
-	void mvAction();
+	void mAction();
 public:
 	void mvUpdate(void* info);
-	FillBlank(int MID=0,int LID =0) :Frame(MID,LID){};
+	FillBlank(int MID,int LID,ID id) :Frame(MID,LID,id){};
 
 };
