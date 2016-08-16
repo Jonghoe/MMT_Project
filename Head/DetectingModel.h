@@ -3,7 +3,7 @@
 #include"MVCPatter.h"
 #include"Classification.h"
 //디버깅시 사용
-#define DEBUG
+#define DEBUG_LV1
 
 // 디버깅 전용 컨트롤러  뷰어 < -- > 컨트롤러 < -- > 모델
 // 싱글레톤 사용
@@ -22,13 +22,11 @@ private:
 	cv::Mat mvIMG;						//mvVc로 받은 영상 변수
 	uchar mvLabelNum;					//라벨 생성 숫자
 	std::list<Label*> mvLabelList;		//현재 영상에서 살아 있는 라벨들의 리스트
-	void* mvConnected[2];				//DbugController,Viewer 객체 포인터
-	void mvSelectAct();					//mvKey 값(/Command)으로 할 행동을 정하는 함수
 	void mvDetecting();					//영상에서 라벨 검색
 	void mvEnd();						//메모리 해제가 필요한 내용들을 메모리 해제
 										//해제하는 함수
+	
 	void mvFindLabel();					//라벨 찾기
-	void mvAddMark();					//마크 추가
 	void mvCheckLabel(cv::Point& firstP);//이 임시라벨이 타당한 라벨인지 확인
 	void mvMoveLabel();					//라벨의 움직임 체크
 	void mvSendLabel();					//라벨 정보를 FrameController로 전달
@@ -38,24 +36,30 @@ private:
 	void mvModifyLabel(Target t);		//라벨의 정보 변경이 필요한지 확인
 										//Target으로 모든 라벨을 할지 조건을
 										//충족하는 라벨만 할지 결정
-
 	DetectingModel();					//Default 생성자 
 										//싱글레톤이기에 private으로 설정
-
 	~DetectingModel();					//파괴자
 										//싱글레톤이기에 private으로 설정
+#ifdef DEBUG_LV1
+	void* mvConnected[2];				//DbugController,Viewer 객체 포인터
+
+	void mvSelectAct();					//mvKey 값(/Command)으로 할 행동을 정하는 함수
+#endif
 public:
+	void mvAddMark();					//마크 추가
+#ifdef DEBUG_LV1
 	void mConnect(MVC Type, void* Vp){  //Dbug Controller,Viewr 연결을 위한 함수
 		if (Type == MVC::V)			mvConnected[0] = Vp;
 		else if (Type == MVC::C)	mvConnected[1] = Vp;
 	}
+#endif
 	static DetectingModel* mMakeModel(){ //싱글레톤 생성 함수
-		if (Alive != NULL)return Alive;
+		if (Alive != nullptr)return Alive;
 		Alive = new DetectingModel();
 		return Alive;
 	}
 	void mDeleteModel(){				// 싱글레톤 파괴 함수
-		if (Alive == NULL)
+		if (Alive == nullptr)
 			return;
 		delete this;
 	}
