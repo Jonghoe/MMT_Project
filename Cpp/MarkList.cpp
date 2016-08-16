@@ -2,6 +2,7 @@
 #include "MyFunction.h"
 #include <process.h>
 #include <Windows.h>
+MarkList* MarkList::Alive = nullptr;
 MarkList::MarkList():mvSize(0){}
 void MarkList::mAddMark( cv::Mat& Mark){
 	if (Mark.rows * Mark.cols == 0){
@@ -12,6 +13,17 @@ void MarkList::mAddMark( cv::Mat& Mark){
 	mvList.push_back(Mark);
 	mvSize++;
 }
+MarkList* MarkList::mMakeMarkList(){
+	if (Alive == nullptr)
+		Alive = new MarkList();
+	return Alive;
+}
+void MarkList::mDeleteMarkList(){
+	if (Alive == nullptr)
+		return;
+	delete this;
+}			
+
 void MarkList::mDeleteMark(const cv::Mat&Mark){
 	size_t i = 0;
 	auto iter = mvList.begin();
