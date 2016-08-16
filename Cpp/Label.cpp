@@ -1,6 +1,6 @@
 #include"Label.h"
 #include"MyFunction.h"
-ID Label::mGetID()const{ return this->mvID; }
+ID Label::mGetID()const{ return this->mvID%200; }
 ID Label::mGetMarkID()const{ return this->mvMarkID; }
 cv::Point Label::mGetCenter()const{ return this->mvCenter; }
 Label::Label(){ mvCenter = cv::Point(0, 0); mvPixelN = 0; mvTilt = 0; }
@@ -13,7 +13,7 @@ Label::Label(int* ranges, int pixelNum, int id,cv::Mat& prevImg){
 	mvPrevImg = prevImg;
 	mvTilt = 0;
 	mvZone=prevImg(cv::Range(mvLT.y, mvRB.y), cv::Range(mvLT.x, mvRB.x));
-#ifdef DEBUG
+#ifdef DEBUG_LV2
 	cout << mvID <<"is Created"<< endl;
 #endif
 }

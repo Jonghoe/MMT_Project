@@ -1,7 +1,7 @@
 #include"DetectingModel.h"
 #include"MyFunction.h"
 #include"DebugViewer.h"
-DetectingModel* DetectingModel::Alive = NULL;
+DetectingModel* DetectingModel::Alive = nullptr;
 
 DetectingModel::DetectingModel(){
 	mvVc = cv::VideoCapture("Sample.avi");
@@ -13,19 +13,16 @@ DetectingModel::DetectingModel(){
 	mvPrevIMG = cv::Scalar::all(0);
 	IMGSetting(mvPrevIMG);
 	mvLabelNum = StartLabel;
-	mvMarkList = new MarkList();
-	mvClassify = new Classification();
+	mvMarkList = MarkList::mMakeMarkList();
+	mvClassify = Classification::mMakeClassify();
 	mvKey = PLAY;
-	mvMarkList->mAddMark(cv::imread("Mark_0.jpg", cv::IMREAD_COLOR));
-	mvMarkList->mAddMark(cv::imread("Mark_1.jpg", cv::IMREAD_COLOR));
-	mvMarkList->mAddMark(cv::imread("Mark_2.jpg", cv::IMREAD_COLOR));
 }
 
 
 DetectingModel::~DetectingModel(){
 	cout << "DetectingModelDelete" << endl;
 	mvEnd();
-	Alive = NULL;
+	Alive = nullptr;
 }
 
 void DetectingModel::mvSetNextLabelID(){
@@ -33,8 +30,8 @@ void DetectingModel::mvSetNextLabelID(){
 	//	빈 ID값 찾아서 다음 LabelID 값으로 설정
 	ID LabelID[MaxLabel] = { 0 };
 	size_t i = 0;
-	auto iter = mvLabelList.begin();
-	for (; iter != mvLabelList.end(); iter++)
+	list<Label*>::iterator iter;
+	for (iter = mvLabelList.begin(); iter != mvLabelList.end(); iter++)
 		LabelID[(*iter)->mGetID() % StartLabel] = 1;
 	
 	for (i = 0; i < MaxLabel; i++)
@@ -105,7 +102,6 @@ void DetectingModel::mvModifyLabel(Target T){
 }
 void DetectingModel::mvAddMark(){
 	string Buff;
-	
 	cin >> Buff;
 	if (Buff.compare("end") == 0)
 		mvKey = PLAY;
@@ -117,7 +113,7 @@ void DetectingModel::mvDetecting(){
 	//	반복되면서 Blob , Detect 등 이런저런 역할을 한다.
 		
 	mvVc >> mvIMG;
-#ifdef DEBUG
+#ifdef DEBUG_LV1
 	((DebugViewer*)mvConnected[0])->mSetRIMG(&mvIMG);
 	((DebugViewer*)mvConnected[0])->mSetChangedIMG(&mvPrevIMG);
 #endif
@@ -134,7 +130,7 @@ void DetectingModel:: mvSendLabel(){
 	list<Label*>::iterator iter;
 	for (iter = mvLabelList.begin(); iter != mvLabelList.end(); iter++){
 		mvClassify->mGetInfo(*iter);
-#ifdef DEBUG
+#ifdef DEBUG_LV2
 		Info = LabeltoString(*(*iter));
 		cout << Info << endl;
 #endif
@@ -157,9 +153,8 @@ void DetectingModel::mvSelectAct(){
 }
 
 bool DetectingModel::mAction(){
-#ifdef DEBUG
+#ifdef DEBUG_LV1
 	mvSelectAct();
-	cout << mvMarkList->mGetSize() << endl;
 	if (mvKey == ADD)
 		mvAddMark();
 	else if (mvKey == PLAY){
