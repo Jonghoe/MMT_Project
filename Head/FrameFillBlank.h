@@ -5,9 +5,15 @@ using namespace std;
 class FillBlank :public Frame
 {
 protected:
-	void mAction();
+	static unsigned WINAPI mainPerform(void*);
+
 public:
 	void mvUpdate(void* info);
-	FillBlank(int MID,int LID,ID id) :Frame(MID,LID,id){};
-
+	FillBlank(Label* lb,ID id) :Frame(lb,id){
+		mvWidth = 100;
+		mvHeight = 100;
+		mvRB.x = mvLT.x + mvWidth;
+		mvRB.y = mvLT.y + mvHeight;
+	};
+	void mAction();
 };
