@@ -1,5 +1,6 @@
 #pragma once
 #include "opencv.hpp"
+#include"My_Debug.h"
 #include <deque>
 class MarkList{
 private:

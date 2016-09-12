@@ -3,6 +3,5 @@
 class Observer
 {
 public :
-	virtual void mvUpdate(void* info) = 0;
-
+	virtual void mUpdate(void* info) = 0;
 };
