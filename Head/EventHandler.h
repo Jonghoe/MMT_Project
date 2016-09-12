@@ -1,22 +1,28 @@
 #pragma once
 #include<vector>
-#include<string>
-#include"Label.h"
+#include"MotionCreater.h"
+#include"Circle.h"
 #include"Event.h"
+
 using namespace std;
 
 class EventHandler{
 private:
-	static EventHandler* Alive;
-	vector<Label*> mvEventlist;
+	bool mvUpdate;
+	Circle mvMChecker;
+	vector<Event> mvEVc;
+	vector<Event> mvEVcT;
+	vector<Motion> mvMVc;
+	MotionCreater mvCreater;
+	cv::Point* mvFrC;
+	void mvIsRelate();
 public:
-	EventHandler():mvEventlist(){}
-	static EventHandler* mMakeEventHandler(){
-		if (Alive == nullptr)
-			Alive = new EventHandler();
-		return Alive;
+	EventHandler(cv::Point* p ) :mvEVc(), mvEVcT(), mvCreater(), mvMChecker(),mvFrC(p){ mvUpdate = false; }
+	bool mGetUpdate(){ return mvUpdate; }
+	void mPush(Event& e){
+		if (mvUpdate ==false)
+			mvUpdate = true;
+		mvEVcT.push_back(e);
 	}
-	void mPush(Label* e){
-		mvEventlist.push_back(e);
-	}
+	vector<Motion> mPutMotion();
 };

@@ -1,12 +1,17 @@
 #pragma once
-
-/* 사용할지 아직 미정 */
+#include"opencv.hpp"
+#include"Label.h"
 class Event{
-protected:
-	virtual void mvAction() = 0;
-	virtual void mOClick() = 0;
-	virtual void mDClick() = 0;
-	virtual void mDrag() = 0;
-	virtual void mJoom() = 0;
-	virtual void mRotate() = 0;
+	cv::Point mvLoc;
+	ID mvID;
+	double mvTilt;
+public:
+	Event(const cv::Point& l, ID id) :mvLoc(l), mvID(id), mvTilt(){}
+	Event() :mvLoc(), mvTilt(),mvID(){}
+	static Event LtoE(const Label& l){	return Event(l.mGetCenter(), l.mGetID());}
+	const cv::Point& mGetLoc()const{ return mvLoc; }
+	cv::Point& mGetLoc(){ return mvLoc; }
+	const ID mGetID()const{ return mvID; }
+	double mGetTilt(){ return mvTilt; }
+	void mSetTilt(cv::Point& c, Event& e);
 };
