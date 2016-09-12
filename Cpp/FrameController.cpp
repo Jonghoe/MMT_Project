@@ -6,80 +6,76 @@ FrameController* FrameController::Alive=nullptr;
 void FrameController::mRegistOb(Observer* Ob){
 	ID MID = ((Frame*)Ob)->mGetMID();
 	ID LID = ((Frame*)Ob)->mGetLID();
-
 	mvFr[MID][LID] = (Frame*)(Ob);
 }
 void FrameController::mUnRegistOb(Observer* Ob){
 	ID MID = ((Frame*)Ob)->mGetMID();
 	ID LID = ((Frame*)Ob)->mGetLID();
-	mvFr[MID][LID]->mStop();
+	mvFr[MID][LID]->mEnd();
 	mvFr[MID][LID] = nullptr;
 }
 
 void FrameController::mNotify(){
-	
+	State Update = UPDATE;
+	for (size_t i = 0; i < mvObVc.size(); ++i)
+		if (mvObVc[i]->mIsAllSet())
+			mvObVc[i]->mUpdate(&Update);
 }
-void FrameController::mvCreate(){
-
+void FrameController::mvCreateFr(){
+	mvPriority = 255 - mvObVc.size();
 	vector<Label*>::const_iterator it;
-	
-	for (it = mvCreateFr.begin(); it != mvCreateFr.end(); ++it){
-		Frame* New = Factory->mvCreate(*it, mvPriority);
+	for (it = mvCrFrVc.begin(); it != mvCrFrVc.end(); ++it){
+		Frame* New = mvCrFr(*it, mvPriority--);
 		mvObVc.push_back(New);
 		mRegistOb(New);
 		New->mAction();
 	}
-	mvCreateFr.resize(0);
+	mvCrFrVc.resize(0);
 }
 
 void FrameController::mvAdjust(){
 	//버퍼들 중 이미 있는 놈들은 제외
 	vector<Label*>::const_iterator it1;
 	vector<Frame*>::iterator it2;
-	for (size_t i = 0; i < mvObVc.size(); i++){
-		mvObVc[i]->mAlive(false);
-	}
+	// 프레임이 들어오는지 안들어오는지 확인하기 위한 절차
+	for (size_t i = 0; i < mvObVc.size(); i++)
+		mvObVc[i]->mGetBaseFr() ? NULL : mvObVc[i]->mAlive(false);
+	
 	for (it1 = mvBuffer.begin(); it1 != mvBuffer.end(); ++it1){
 		ID MID = (*it1)->mGetMarkID();
 		ID LID = (*it1)->mGetID();
 		if (mvFindOb(*it1) == false)
- 			mvCreateFr.push_back(*it1);
+ 			mvCrFrVc.push_back(*it1);
 		else
 			mvFr[MID][LID]->mAlive(true);
 	}
-	//버퍼 사용후 사이즈 0 으로 초기화
+	//버퍼 사용후 사이즈 0 으로 초기화FillBlank
 	mvBuffer.resize(0);
 	
-	//기존에 있던 Frame 들중 죽은 경우 삭제될 Frame으로 지정
-	int Count = 0;
-	for (it2 = mvObVc.begin(); it2 != mvObVc.end()-Count;++it2)
-		if ((*it2)->mGetAlive() == false){
-			vector<Frame*>::iterator tmp = it2;
-			if (mvObVc.size() != 1){
-				--it2;
-				++Count;
-			}
-			mvDeleteFr.push_back(*tmp);
-			cv::Point A((*(mvObVc.end() - 1))->mGetLID(), (*(mvObVc.end() - 1))->mGetLID());
-			cv::Point B((*(tmp))->mGetLID(), (*(tmp))->mGetLID());
-			swap(*tmp, *(mvObVc.end()-1-Count));
+	//기존에 있던 Frame 들중 죽은 경우 삭제될 Frame을 mvDlFr로 이동
+	size_t Count = 0;
+	while (Count < mvObVc.size())
+		if (mvObVc[Count]->mGetAlive() == false){
+			mvDlFrVc.push_back(mvObVc[Count]);
+			swap(mvObVc[Count], mvObVc[mvObVc.size() - 1]);
+			mvObVc.pop_back();
 		}
-	for (int i = 0; i < mvDeleteFr.size(); ++i)
-		mvObVc.pop_back();
+		else
+			++Count;
 }
 // 라벨 입력 완료후 호출
 void FrameController::mvDeleteFrame(){
 	vector<Frame*>::iterator it;
-	for (it = mvDeleteFr.begin(); it != mvDeleteFr.end(); ++it){
-		ID MID = (*it)->mGetMID();
-		ID LID = (*it)->mGetLID();
-		(*it)->mEnd();
-		mvFr[MID][LID] = nullptr;
-		delete (*it);
+	for (it = mvDlFrVc.begin(); it != mvDlFrVc.end();){
+		Frame* tmp = *it;
+		mUnRegistOb(*it);
+		WaitForSingleObjectEx((*it++)->mGetHandle(), INFINITE,true);
+		delete tmp;
 	}
-	mvDeleteFr.resize(0);
+	mvDlFrVc.resize(0);
 }
 void FrameController::mvModifyPr(size_t l, size_t r){
+	// nullptr 의 경우 신경을 써야하는지 아닌지 아직 의문
 #define Pr(x) x->mGetPriority()
 	if (l >= r)
 		return;
@@ -107,6 +103,21 @@ void FrameController::mvModifyPr(size_t l, size_t r){
 	mvModifyPr(l, rr);
 	mvModifyPr(rr + 1, r);
 }
+
+Frame* FrameController::mvRightFrame(const Event& e)const{
+	vector<Frame*>::const_iterator it;
+	for (it = mvObVc.begin(); it != mvObVc.end(); ++it)
+		if ((*it)->mIn(e.mGetLoc()))
+			return *it;
+	return nullptr;
+}
+void FrameController::mvThrowEvent(){
+	vector<Label*>::const_iterator it;
+	Event tmp;
+	for (it = mvHand.begin(); it != mvHand.end(); ++it)
+		mvRightFrame(tmp)->mEventPush(Event::LtoE(**it));
+	mNotify();
+}
 void FrameController::mControll(){
 	// 삭제할 Frame 찾기
 	mvAdjust();
@@ -114,7 +125,10 @@ void FrameController::mControll(){
 	mvDeleteFrame();
 	// 우선순위 정렬
 	mvModifyPr(0, mvObVc.size());
-	mvPriority = 255 - mvObVc.size();
+	// 이벤트 전달
+	mvThrowEvent();
+	if (mvCrFrVc.size() != 0)
 	// Frame 생성
-	mvCreate();
+		mvCreateFr();
+	
 }

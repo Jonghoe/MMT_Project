@@ -2,14 +2,15 @@
 #include "MyFunction.h"
 #include <process.h>
 #include <Windows.h>
+using namespace cv;
 MarkList* MarkList::Alive = nullptr;
 MarkList::MarkList():mvSize(0){}
-void MarkList::mAddMark( cv::Mat& Mark){
+void MarkList::mAddMark( Mat& Mark){
 	if (Mark.rows * Mark.cols == 0){
 		cout << "Wrong Input" << endl;
 		return;
 	}
-	cv::cvtColor(Mark, Mark, cv::COLOR_BGR2GRAY);
+	cvtColor(Mark, Mark, COLOR_BGR2GRAY);
 	mvList.push_back(Mark);
 	mvSize++;
 }
@@ -24,16 +25,16 @@ void MarkList::mDeleteMarkList(){
 	delete this;
 }			
 
-void MarkList::mDeleteMark(const cv::Mat&Mark){
+void MarkList::mDeleteMark(const Mat&Mark){
 	size_t i = 0;
 	auto iter = mvList.begin();
 	i = mFindMark(Mark);
 	mvList.erase((iter + i));
 }
-int MarkList::mFindMark(const cv::Mat& src)const{
+int MarkList::mFindMark(const Mat& src)const{
 	HANDLE* Thread = new HANDLE[mvSize];
 	TRMatchingInform* Inform = new TRMatchingInform[mvSize];
-	cv::Mat Tmp(src);
+	Mat Tmp(src);
 	double MaxVal;
 	int Index = 0;
 	
@@ -42,7 +43,7 @@ int MarkList::mFindMark(const cv::Mat& src)const{
 	//쓰레드 핸들러에게 넘겨줄 정보저장
 	for (size_t i = 0; i < mvSize; i++){
 		//비교할 영상의 크기를 변경
-		cv::resize(src, Tmp, mvList[i].size());
+		resize(src, Tmp, mvList[i].size());
 		Inform[i].CompareIMG = Tmp;
 		Inform[i].MarkIMG = mvList[i];
 		Inform[i].MaxVal = 0;

@@ -6,7 +6,8 @@ private:
 	static Classification* Alive;
 	FrameController* frameController;
 	vector<Label*> info;
-	
+	bool mvStop;
+	bool mvStopFirst;
 	static bool IsMark(const Label* obj){
 		if (obj->mGetMarkID() == 0)
 			return false;
@@ -26,15 +27,10 @@ public:
 			return;
 		delete Alive;
 	}
-	void mGetInfo(Label* _i){	info.push_back(_i);	}
-
-	void classify(){
-		vector<Label*>::iterator it;
-		for (it = info.begin(); it != info.end(); ++it)
-			if (IsMark(*it))
-				frameController->mPushMark(*it);
-			else
-				frameController->mPushEvent(*it);
-		info.resize(0);
+	void mGetInfo(Label* _i){ info.push_back(_i); }
+	void mGetInfo(const std::vector<Label*>& vc){
+		for(size_t i=0;i<vc.size();++i)
+			info.push_back(vc[i]);
 	}
+	void classify();
 };
