@@ -6,11 +6,13 @@ import java.util.Observable;
 import DATA.EventType;
 import DATA.Label;
 import DATA.MTTEvent;
+import DATA.Model;
 import DATA.Panel;
 import DATAMethod.EventBundleMethod;
 import DATAMethod.EventFactory;
 import DATAMethod.EventMethod;
 import DATAMethod.LabelInPanel;
+import SubClass.SampleDataReader;
 
 
 public class MID extends Observable implements Runnable {
@@ -20,17 +22,20 @@ public class MID extends Observable implements Runnable {
 	private ArrayList<Panel> panelList;
 	private ArrayList<MTTEvent> eventList;
 	private boolean Readable;
+	SampleDataReader sample;
 	private MID(){
 		Sigleton=this;
 		Readable=true;
 		panelList = new ArrayList<Panel>();
 		curList = new ArrayList<Label>();
 		eventList = new ArrayList<MTTEvent>();
+		sample = new SampleDataReader("Info.txt");
 		
 	}
 	
 	private void GetDataString(){
 		//소켓 통신을 통해 LABEL 데이터를 String타입으로 받는 함수		
+		
 		AddLabel(new Label());
 	}	
 	private void AddLabel(Label l){
@@ -100,6 +105,19 @@ public class MID extends Observable implements Runnable {
 		else
 			return Sigleton;
 	}
+	private boolean TransmitOver(){
+		int count;
+		count =0;
+		for(MTTEvent e : eventList)
+			if(!e.GetConsumed())
+				++count;			
+		if(count ==0 )
+			return true;
+		return false;
+	}
+	public void Add(Panel p){
+		panelList.add(p);
+	}
 	public ArrayList<MTTEvent> GetEventList(){return eventList;}
 	@Override
 	public void run() {
@@ -114,11 +132,38 @@ public class MID extends Observable implements Runnable {
 			MakeEvent();
 			//만들어진 이벤트 옵저버들에게 뿌림
 			notifyObservers();
+			while(!TransmitOver());
 			//라벨목록을 변경
 			prevList = curList;
 			curList= new ArrayList<Label>();
 			Readable = true;
 			
 		}
+	}
+	
+	public void DO(){
+		//소켓을 통해 데이터를 받음
+			while(true){
+				//소켓통신을 통해 데이터 생성
+				GetDataString();
+				Readable = false;
+				//생성된 데이터 패널과 연결
+				SetLabelPanel();
+				//이벤트 생성
+				MakeEvent();
+				//만들어진 이벤트 옵저버들에게 뿌림
+				notifyObservers();
+				while(!TransmitOver());
+				//라벨목록을 변경
+				prevList = curList;
+				curList= new ArrayList<Label>();
+				Readable = true;
+				
+			}
+	}
+	public static void main(String args[]){
+		MID body = new MID();
+		body.DO();
+		//Model m = new Model();
 	}
 }
