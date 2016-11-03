@@ -19,6 +19,19 @@ public class RandomID {
 		for(int i=0;i<Limit;++i)
 			m[i]=null;
 	}
+	static public void RelieveID(Object o){
+		if(Singleton==null)
+			;
+		Random r = new Random();
+		if(o instanceof Component){
+			Component com = (Component)o;
+			c[com.GetID()]=null;
+		}
+		else if(o instanceof Model){
+			Model com = (Model)o;
+			c[com.GetID()]=null;
+		}
+	}
 	static public int MakeID(Object o){
 		if(Singleton==null)
 			return -1;
