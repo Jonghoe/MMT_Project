@@ -1,7 +1,7 @@
-package DATA;
+package data;
 
 import java.util.ArrayList;
 
 public interface EventListener {
-	public void Action(ArrayList<MTTEvent> curList,ArrayList<MTTEvent> preList);
+	public void action(ArrayList<MTTEvent> events);
 }

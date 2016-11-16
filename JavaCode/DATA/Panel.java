@@ -1,21 +1,14 @@
-package DATA;
-import java.util.TreeMap;
+package data;
 
-public class Panel {
-	int PID;
-	TreeMap<String,Component> componentList; 
-	Panel(){
-		componentList=new TreeMap<String,Component>();
-	}
-	public void Add(Component c){componentList.put(Integer.toString(c.GetID()),c);}
-	public void Delete(Component c){
-		if(componentList.containsKey(Integer.toString(c.GetID())))
-			componentList.remove(c);
-	}
-	public int GetID(){return PID;}
-	public boolean IsGet(Label l){
-		return true;
+public class Panel extends Model {
+	public Panel(int x, int y, int w, int h) {
+		super(x, y, w, h);
+		// TODO Auto-generated constructor stub
 	}
 
-
+	@Override
+	protected void action() {
+		// TODO Auto-generated method stub
+		
+	}
 }

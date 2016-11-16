@@ -1,22 +1,25 @@
-package DATA;
+package data;
 
 import java.awt.Point;
 
 public class Label {
-	Point p;
-	int LID,markID,PID;
+	private Point center;
+	private int LID,markID,ID;
+	private boolean consumed; 
 	//xxxxyyyLIDmI
 	public Label(String info){
-		p = new Point(Integer.parseInt(info.substring(0, 4)),Integer.parseInt(info.substring(4, 7)));
+		center = new Point(Integer.parseInt(info.substring(0, 4)),Integer.parseInt(info.substring(4, 7)));
 		LID = Integer.parseInt(info.substring(7, 9));
 		markID = Integer.parseInt(info.substring(9, 11));
 	}
 	public Label(){
-		p=new Point(0,0);
+		center=new Point(50,50);
 		LID = 1;
 		markID = 1;
 	}
-	public Point GetPT(){return p;}
-	public void SetPID(int p){PID = p;}
-	public int GetPID(){return PID;}
+	public void setConsumed(boolean b){consumed=b;}
+	public boolean Consumed(){return consumed;}
+	public Point center(){return center;}
+	public void setPID(int p){ID = p;}
+	public int ID(){return ID;}
 }

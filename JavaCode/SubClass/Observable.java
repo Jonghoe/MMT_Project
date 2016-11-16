@@ -1,4 +1,4 @@
-package SubClass;
+package subclass;
 
 import java.util.Observer;
 

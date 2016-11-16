@@ -12,7 +12,10 @@ public class LabelInPanel {
 			if(p.get(i).IsGet(l))
 				Possible.add(p.get(i));
 		Possible.sort(null);
-		return Possible.get(0).GetID();	
+		if(Possible.size()>0)
+			return Possible.get(0).GetID();
+		else
+			return -1;
 	}
 	
 }

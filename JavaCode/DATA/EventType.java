@@ -1,4 +1,4 @@
-package DATA;
+package data;
 
 public enum EventType
 {

@@ -12,7 +12,7 @@ import datamethod.RandomID;
 import middleprocess.OS;
 
 public abstract  class Model extends Component implements Observer,Runnable{
-	// ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½Þ´Âµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+	// ÀÌº¥Æ®¸¦ ¹Þ´Âµ¿¾È ´ë±â
 	protected boolean stop;
 	protected ArrayList<EventListener> eventListeners;
 	protected ArrayList<MTTEvent> events;
@@ -26,14 +26,14 @@ public abstract  class Model extends Component implements Observer,Runnable{
 	}
 	private boolean release(){
 		boolean ret=false ;
-		for(Component c:components)				// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® release
+		for(Component c:components)				// ÇÏÀ§ ÄÄÆ÷³ÍÆ® release
 			release(c);
 
-		if(this instanceof KFrame)				// ï¿½Ú±ï¿½ ï¿½Ú½ï¿½ release 
-			ret|= OS.Instance().release(this);// KFrameï¿½ï¿½ ï¿½ï¿½ï¿½ OSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ release
-		ret |= ComponentController.release(this);// thisï¿½ï¿½ ï¿½ï¿½ï¿½Û·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Â³ï¿½é¿¡ï¿½Ô¼ï¿½ release
+		if(this instanceof KFrame)				// ÀÚ±â ÀÚ½Å release 
+			ret|= OS.Instance().release(this);// KFrameÀÏ °æ¿ì OS¿¡¼­µµ release
+		ret |= ComponentController.release(this);// thisÀÇ ·¹ÆÛ·±½º¸¦ °¡Áö°í ÀÖ´Â³ðµé¿¡°Ô¼­ release
 		ret |= RandomID.release(this);			
-		deleteObservers();						// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		deleteObservers();						// µî·ÏÇÑ ¿ÉÀú¹ö »èÁ¦
 		return ret;
 	}
 	protected boolean release(Component c){
@@ -59,22 +59,22 @@ public abstract  class Model extends Component implements Observer,Runnable{
 		components = new ArrayList<Component>();
 		stop =false;
 	}
-	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½Î¿ï¿½
+	// ¸®½º³Ê¿¡°Ô ÀÌº¥Æ® ¾²·Î¿ì
 	protected void throwEventtoListener(){
 		for (EventListener listener : eventListeners)
 			listener.action(events);
 	}
-	/*	HandDrag,Release,Press ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	/*	HandDrag,Release,Press ¿Ü °í¼öÁØ ÀÌº¥Æ® »ý¼º¿¡ ´ëÇØ¼± ¾ÆÁ÷ ¹ÌÁ¤
 	 * private void makeEvent(){
 		ArrayList<Thread> threadList = new ArrayList<Thread>();
-		//ï¿½ï¿½ ï¿½Ð³Îµï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		//°¢ ÆÐ³ÎµéÀ» ÇÑ ¾²·¹µå·Î ÀÌº¥Æ®¸¦ »ý¼º
 		for(Component c: components){
 			int ID = c.ID();
 			Thread th = new Thread(new EventBundleMethod(ID,events,preEvents,curEvents));
 			th.start();
 			threadList.add(th);
 		}
-		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+		//¾²·¹µå ´ë±â
 		for(Thread t:threadList){
 			try {
 				t.join();
@@ -86,7 +86,7 @@ public abstract  class Model extends Component implements Observer,Runnable{
 	}*/
 	
 	
-	// ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+	// ÀÌº¥Æ® ÃßÃâ
 	private void findHandEvent(){
 		MTTEvent tmp=null;
 		if(prevLabels!=null)
@@ -96,42 +96,42 @@ public abstract  class Model extends Component implements Observer,Runnable{
 				events.add(tmp);
 		}
 		for(Label l:curLabels){
-			//PRESS ï¿½Ë»ï¿½
+			//PRESS °Ë»ö
 			tmp = EventFactory.newEvent(EventType.KJH_HAND_PRESS,l, prevLabels);
 			if(tmp != null)
 				events.add(tmp);
 			tmp = null;
-			//DRAG ï¿½Ë»ï¿½
+			//DRAG °Ë»ö
 			tmp = EventFactory.newEvent(EventType.KJH_HAND_DRAG,l, curLabels);
 			if(tmp != null)
 				events.add(tmp);
 		}
 	}
 	private void makeEvent(){
-		//Hand ï¿½Ìºï¿½Æ® ï¿½Ë»ï¿½
+		//Hand ÀÌº¥Æ® °Ë»ö
 		findHandEvent();
 	}
 	
 	@Override
-	// update ï¿½ï¿½È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ thisï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ area,zï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½Ï¿ï¿½ 
-	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ labelï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ componentï¿½ï¿½ idï¿½ï¿½ labelï¿½ï¿½ idï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
-	// ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ labelï¿½ï¿½ ï¿½Â´ï¿½ idï¿½ï¿½ ï¿½óº§µï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½.
-	// ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½óº§µï¿½ï¿½ï¿½ ï¿½Ì¿ï¿½ï¿½Ï¿ï¿½ eventï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
-	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Êµé¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+	// update ½ÅÈ£°¡¿À¸é this°¡ °¡Áö°í ÀÖ´Â ÄÄÆ÷³ÍÆ®µéÀÇ area,z¸¦ ÀÌ¿ëÇÏ¿© 
+	// °¢°¢ÀÇ labelÀ» °¡Áö´Â componentÀÇ id·Î labelÀÇ id¸¦ ¼³Á¤ÇÑ´Ù
+	// ±×¸®°í °¢ labelÀÇ ¸Â´Â id·Î ¶óº§µéÀ» ´øÁ®ÁØ´Ù.
+	// ±× ÈÄ ³²Àº ¶óº§µéÀ» ÀÌ¿ëÇÏ¿© event¸¦ ¸¸µç´Ù.
+	// ¸¸µç ÀÌº¥Æ®¸¦ ¸®½º³Êµé¿¡°Ô ´øÁø´Ù.
 	public void update(Observable o, Object arg) {
 		// TODO Auto-generated method stub
 		if( o instanceof Model ){
-			setLabelComponent();					// ï¿½ï¿½ï¿½ï¿½ componentï¿½ï¿½ ï¿½Â´ï¿½ label idï¿½ï¿½ï¿½ï¿½
-			throwLabel();							// labelï¿½ï¿½ idï¿½ï¿½ ï¿½Â´ï¿½ componentï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			Collections.copy(prevLabels, curLabels);// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Ê¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			curLabels.clear();						// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½×¾ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-			for(Label lb: ((Model)o).curLabels){	// this.IDï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ 
+			setLabelComponent();					// ÇÏÀ§ component¿¡ ¸Â´Â label id¼³Á¤
+			throwLabel();							// labelÀÇ id¿¡ ¸Â´Â component·Î ¶óº§À» ´øÁü
+			Collections.copy(prevLabels, curLabels);// ÀÌÀü ¶óº§ ÄÁÅ×ÀÌ³Ê¿¡ ÇöÀç ¶óº§ ÄÁÅ×ÀÌ³Ê ³»¿ë º¹»ç
+			curLabels.clear();						// ÇöÀç ¶óº§ ÄÁÅ×¾î´Ï ³»¿ë Áö¿ò
+			for(Label lb: ((Model)o).curLabels){	// this.ID¿Í ÀÏÄ¡ÇÏ´Â ¶óº§À» Ãß°¡ 
 				if(lb.ID()==ID)					//
 					curLabels.add(lb);				//
 			}
-			events.clear();						// ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
-			makeEvent();							// ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½
-			throwEventtoListener();					// ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+			events.clear();						// ÇöÀç ÀÌº¥Æ® ÄÁÅ×ÀÌ³Ê ³»¿ë Áö¿ò 
+			makeEvent();							// ÀÌº¥Æ® »ý¼º
+			throwEventtoListener();					// ÀÌº¥Æ® ¸®½º³Ê¿¡°Ô ÀÌº¥Æ® ´øÁü
 		}
 	}
 	@Override
@@ -139,9 +139,9 @@ public abstract  class Model extends Component implements Observer,Runnable{
 		action();
 		release();
 	}
-	// ï¿½ðµ¨µï¿½ï¿½ï¿½ ï¿½àµ¿
+	// ¸ðµ¨µéÀÇ Çàµ¿
 	protected abstract void action();
-	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
+	// ¸®½º³Ê Ãß°¡
 	final public void add(EventListener el){eventListeners.add(el);}
 	final public Component component(int idx){return components.get(idx);}
 	public Model(int x,int y,int w, int h){

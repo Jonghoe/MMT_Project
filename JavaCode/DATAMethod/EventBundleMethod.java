@@ -1,11 +1,11 @@
-package DATAMethod;
+package datamethod;
 
 import java.util.ArrayList;
 
-import DATA.EventType;
-import DATA.Label;
-import DATA.MTTEvent;
-import DATA.Panel;
+import data.EventType;
+import data.Label;
+import data.MTTEvent;
+import data.Panel;
 
 public class EventBundleMethod implements Runnable{
 	int ID;
@@ -22,18 +22,18 @@ public class EventBundleMethod implements Runnable{
 	public void run() {
 		// TODO Auto-generated method stub
 		MTTEvent event = null;
-		event = EventFactory.Product(EventType.KJH_DESTROY,curList,prevList,ID);
+		event = EventFactory.newEvent(EventType.KJH_DESTROY,curList,prevList,ID);
 		synchronized(this){
 		if(event !=null)
 			eventList.add(event);
 		else{
-			event = EventFactory.Product(EventType.KJH_JOOM_IN,curList,prevList,ID);
+			event = EventFactory.newEvent(EventType.KJH_JOOM_IN,curList,prevList,ID);
 			if(event !=null)
 				eventList.add(event);
-			event = EventFactory.Product(EventType.KJH_JOOM_OUT,curList,prevList,ID);
+			event = EventFactory.newEvent(EventType.KJH_JOOM_OUT,curList,prevList,ID);
 			if(event !=null)
 				eventList.add(event);
-			event = EventFactory.Product(EventType.KJH_ROTATE,curList,prevList,ID);
+			event = EventFactory.newEvent(EventType.KJH_ROTATE,curList,prevList,ID);
 			if(event !=null)
 				eventList.add(event);
 			}

@@ -1,7 +1,6 @@
-package DATA;
+package data;
 
 import java.awt.Point;
-
 public class MTTEvent {
 	private int MID;
 	private Point pt;
@@ -29,12 +28,11 @@ public class MTTEvent {
 		consumed=false;
 		MID = pID;
 	}
-	private void SetType(){;}
-	private EventType GetType(){return type;}
-	public boolean GetConsumed(){return consumed;}
-	public void SetConsumed(boolean c){consumed = c;}
-	public double GetRate(){return rate;}
-	public Point GetPoint(){return pt;}
-	public int GetMID(){return MID;}
-	 
+	
+	private EventType Type(){return type;}
+	public boolean Consumed(){return consumed;}
+	public void setConsumed(boolean c){consumed = c;}
+	public double Rate(){return rate;}
+	public Point Point(){return pt;}
+	public int MID(){return MID;} 
 }

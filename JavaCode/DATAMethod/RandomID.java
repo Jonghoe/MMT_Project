@@ -1,55 +1,31 @@
-package DATAMethod;
+package datamethod;
 
 import java.util.Random;
 
-import DATA.Component;
-import DATA.Model;
+import data.Component;
+import data.Model;
 
 public class RandomID {
 	static final private int Limit = 10000;
-	static private Model[]m;
-	static private Component[]c;
-	private static RandomID Singleton=null;
-	private RandomID(){
-		Singleton= this;
-		c=new Component[Limit];
-		m=new Model[Limit];
+	static private Object[] list=new Object[Limit];
+	static public void Init(){
 		for(int i=0;i<Limit;++i)
-			c[i]=null;
-		for(int i=0;i<Limit;++i)
-			m[i]=null;
+			list[i]=null;
 	}
-	static public void RelieveID(Object o){
-		if(Singleton==null)
-			;
-		Random r = new Random();
+	static public synchronized boolean release(Object o){
+		
 		if(o instanceof Component){
 			Component com = (Component)o;
-			c[com.GetID()]=null;
+			list[com.ID()]=null;
+			return true;
 		}
-		else if(o instanceof Model){
-			Model com = (Model)o;
-			c[com.GetID()]=null;
-		}
+		return false;
 	}
-	static public int MakeID(Object o){
-		if(Singleton==null)
-			return -1;
+	static public int makeID(Object o){
 		int ID=0;
 		Random r = new Random();
-		if(o instanceof Component){
-			for(ID=0;c[ID]==null;ID=r.nextInt()%Limit);
-			c[ID]=(Component)o;
-		}
-		else if(o instanceof Model){
-			for(ID=0;m[ID]==null;ID=r.nextInt()%Limit);
-			m[ID]=(Model)o;
-		}
+		for(ID=0;list[ID]!=null;ID=r.nextInt()%Limit);
+		list[ID]=o;
 		return ID;
-	}
-	static public RandomID Create(){
-		if(Singleton == null)
-			Singleton = new RandomID();
-		return Singleton;
 	}
 }
